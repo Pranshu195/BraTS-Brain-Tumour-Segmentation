@@ -14,7 +14,14 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 
 class BratsDataset(Dataset):
-    def __init__(self, df: pd.DataFrame, phase: str="test", is_resize: bool=False):
+    def __init__(self, path_to_csv, phase: str="test", is_resize: bool=False, fold: int=0):
+        df = pd.read_csv(path_to_csv)
+        # print(df['fold'])
+        train_df = df.loc[df['fold'] != fold].reset_index(drop=True)
+        val_df = df.loc[df['fold'] == fold].reset_index(drop=True)
+
+        df = train_df if phase == "train" else val_df
+
         self.df = df
         self.phase = phase
         self.augmentations = self.get_augmentations(phase)
@@ -225,8 +232,8 @@ if __name__ == "__main__":
     print("Min/Max Image values:", img_numpy.min(), img_numpy.max())
     print("Num uniq Mask values:", np.unique(mask_numpy, return_counts=True))
 
-    image = np.rot90(montage(img_numpy))
-    mask = np.rot90(montage(mask_numpy)) 
+    # image = np.rot90(montage(img_numpy))
+    # mask = np.rot90(montage(mask_numpy))
     print(img_numpy.shape)
     cv2.imshow("image", img_numpy[100, :, :])
     
